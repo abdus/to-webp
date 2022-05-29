@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+      tailwind.config = {
+        theme: {},
+      };
+    </script>
+  </head>
+  <body>
+    <div class="max-w-6xl m-auto px-4">
+      <h1 class="mt-6 mb-2 text-2xl text-center tracking-wider">
+        IMAGE TO WEBP
+      </h1>
+
+      <form id="source-img-upload">
+        <label class="block my-2">
+          <input type="file" multiple class="py-2" />
+        </label>
+        <div class="flex flex-wrap gap-4">
+          <label class="grow">
+            <span class="text-sm tracking-wider">QUALITY</span>
+            <input
+              class="block border rounded border-gray-300 w-full"
+              type="number"
+              max="100"
+              min="0"
+              value="75"
+              name="quality"
+            />
+          </label>
+
+          <label class="grow">
+            <span class="text-sm tracking-wider">WIDTH</span>
+            <input
+              class="block border rounded border-gray-300 w-full"
+              type="number"
+              max="7000"
+              min="0"
+              value="0"
+              name="width"
+            />
+          </label>
+
+          <label class="grow">
+            <span class="text-sm tracking-wider">HEIGHT</span>
+            <input
+              class="block border rounded border-gray-300 w-full"
+              type="number"
+              max="7000"
+              min="0"
+              value="0"
+              name="height"
+            />
+          </label>
+
+          <label class="grow">
+            <span class="text-sm tracking-wider">TARGET SIZE (in KB)</span>
+            <input
+              class="block border rounded border-gray-300 w-full"
+              type="number"
+              max="10000"
+              min="0"
+              value="0"
+              name="size"
+            />
+          </label>
+        </div>
+      </form>
+
+      <div
+        id="image-container"
+        class="my-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 p-2 border rounded hidden"
+      ></div>
+    </div>
+
+    <script>
+      function randStr(length, current) {
+        current = current ? current : '';
+        return length
+          ? randStr(
+              --length,
+              '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'.charAt(
+                Math.floor(Math.random() * 60)
+              ) + current
+            )
+          : current;
+      }
+
+      try {
+        const form = document.querySelector('#source-img-upload');
+        const formInput = form.querySelector('input[type="file"]');
+        const imageContainerDiv = document.querySelector('#image-container');
+
+        formInput.addEventListener('change', (ev) => {
+          const uid = randStr(7);
+          const files = ev.target.files || [];
+          const srcFormData = new FormData(form);
+
+          for (let file of files) {
+            // TODO: add loader
+
+            const q = srcFormData.get('quality') || 75;
+            const size = (parseInt(srcFormData.get('size')) || 0) * 1000; // in bytes
+            const width = srcFormData.get('width') || 0;
+            const height = srcFormData.get('height') || 0;
+            const opts = `quality=${q}&width=${width}&height=${height}&size=${size}`;
+            const xhrFormData = new FormData();
+
+            xhrFormData.append('file', file);
+
+            fetch(encodeURI(`/resize?${opts}`), {
+              method: 'POST',
+              body: xhrFormData,
+            })
+              .then((d) => d.json())
+              .then((resp) => {
+                if (!resp.data) {
+                  throw Error('something went wrong');
+                }
+
+                const webp = resp.data.webp;
+                const img = document.createElement('img');
+                const anchor = document.createElement('a');
+
+                img.setAttribute('src', webp);
+                img.classList.add(
+                  'rounded',
+                  'w-full',
+                  'h-full',
+                  'object-cover'
+                );
+
+                anchor.appendChild(img);
+                anchor.setAttribute('href', webp);
+                anchor.setAttribute('target', '_blank');
+                anchor.setAttribute('name', webp.split('/').pop());
+                anchor.setAttribute('download', '');
+                anchor.classList.add(
+                  'rounded',
+                  'bg-white',
+                  'flex',
+                  'items-center',
+                  'justify-center'
+                );
+
+                imageContainerDiv.prepend(anchor);
+                imageContainerDiv.classList.remove('hidden');
+              });
+          }
+        });
+      } catch (err) {
+        console.log(err.message);
+      }
+    </script>
+  </body>
+</html>
