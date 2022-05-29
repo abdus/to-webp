@@ -7,7 +7,7 @@ declare module 'fastify' {
 
 const envSchema = {
   type: 'object',
-  required: ['DB_HOSTNAME', 'DB_USERNAME', 'DB_PASSWORD', 'DATABASE_NAME'],
+  required: [],
   properties: {
     PORT: { type: 'string', default: 3000 },
     DATABASE_NAME: { type: 'string' },
