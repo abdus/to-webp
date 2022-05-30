@@ -39,9 +39,9 @@ export function convertToWebP(
   }
 
   execSync(
-    `cwebp ${source} ${
+    `cwebp '${source}' ${
       config ? getConfigString(config) : ''
-    } -o ${destination}`,
+    } -o '${destination}'`,
     {
       stdio: 'inherit',
     },

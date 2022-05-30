@@ -34,13 +34,8 @@ export async function resizeRoutes(fastify: FastifyInstance) {
     async handler(req) {
       const file = await req.file();
       const userId = Buffer.from(req.session.sessionId).toString('hex');
-      const userDir = new UserDir(file.mimetype, userId);
+      const userDir = new UserDir(file.mimetype, userId, file.filename);
       const destFilePath = userDir.getUploadFilePath();
-
-      fastify.log.info({
-        q: req.query.quality,
-        resize: `${req.query.width} ${req.query.height}`,
-      });
 
       await pump(file.file, fs.createWriteStream(destFilePath));
       await convertToWebP(

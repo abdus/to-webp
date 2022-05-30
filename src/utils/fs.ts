@@ -1,6 +1,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import mime from 'mime-types';
+import { execSync } from 'child_process';
 import { UPLOAD_DIR } from '../config/constants';
 
 export class UserDir {
@@ -12,13 +13,19 @@ export class UserDir {
 
   extension = '';
 
-  constructor(mimeType?: string, userId?: string) {
+  constructor(mimeType?: string, userId?: string, fname?: string) {
     const dirname = userId || crypto.randomUUID();
     const extension = mime.extension(mimeType || '');
     const dirFullPath = `${UPLOAD_DIR}/${dirname}`;
 
     if (!fs.existsSync(dirFullPath)) {
       fs.mkdirSync(dirFullPath, { recursive: true });
+    }
+
+    if (fname) {
+      this.filename = `${fname.replace(/\..*$/gi, '').replace(/'/gi, '')}.${
+        this.filename
+      }`;
     }
 
     this.dir = dirFullPath;
@@ -39,4 +46,8 @@ export class UserDir {
   getPublicWebpUri() {
     return `/bin/${this.userDirName}/${this.filename}.webp`;
   }
+}
+
+export function unzip(inputZip: string, outputDir: string) {
+  execSync(`unzip -d '${inputZip}' '${outputDir}'`, { stdio: 'inherit' });
 }
