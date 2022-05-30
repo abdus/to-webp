@@ -3,13 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <title>Img to WebP</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <script>
       tailwind.config = {
         theme: {},
       };
     </script>
+    <style>
+      @keyframes blink {
+        from {
+          opacity: 0%;
+        }
+        50% {
+          opacity: 100%;
+        }
+        to {
+          opacity: 0%;
+        }
+      }
+
+      #loader {
+        animation: blink 1s ease infinite;
+      }
+    </style>
   </head>
   <body>
     <div class="max-w-6xl m-auto px-4">
@@ -21,6 +38,7 @@
         <label class="block my-2">
           <input type="file" multiple class="py-2" />
         </label>
+
         <div class="flex flex-wrap gap-4">
           <label class="grow">
             <span class="text-sm tracking-wider">QUALITY</span>
@@ -70,6 +88,13 @@
             />
           </label>
         </div>
+
+        <div
+          id="loader"
+          class="hidden my-6 text-center font-bold tracking-wider"
+        >
+          LOADING
+        </div>
       </form>
 
       <div
@@ -92,8 +117,11 @@
       }
 
       try {
+        const loadingDataFor = [];
+
         const form = document.querySelector('#source-img-upload');
         const formInput = form.querySelector('input[type="file"]');
+        const loaderElem = document.querySelector('#loader');
         const imageContainerDiv = document.querySelector('#image-container');
 
         formInput.addEventListener('change', (ev) => {
@@ -101,8 +129,11 @@
           const files = ev.target.files || [];
           const srcFormData = new FormData(form);
 
+          loaderElem.classList.remove('hidden');
+
           for (let file of files) {
-            // TODO: add loader
+            const blockId = Symbol('block id');
+            loadingDataFor.push(blockId);
 
             const q = srcFormData.get('quality') || 75;
             const size = (parseInt(srcFormData.get('size')) || 0) * 1000; // in bytes
@@ -150,6 +181,17 @@
 
                 imageContainerDiv.prepend(anchor);
                 imageContainerDiv.classList.remove('hidden');
+              })
+              .finally(() => {
+                const idx = loadingDataFor.indexOf(blockId);
+
+                if (idx !== -1) {
+                  loadingDataFor.splice(idx, 1);
+                }
+
+                if (loadingDataFor.length === 0) {
+                  loaderElem.classList.add('hidden');
+                }
               });
           }
         });
