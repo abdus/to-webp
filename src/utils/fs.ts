@@ -23,9 +23,7 @@ export class UserDir {
     }
 
     if (fname) {
-      this.filename = `${fname.replace(/\..*$/gi, '').replace(/'/gi, '')}.${
-        this.filename
-      }`;
+      this.filename = `${fname.replace(/\..*$/gi, '').replace(/'/gi, '')}`;
     }
 
     this.dir = dirFullPath;
