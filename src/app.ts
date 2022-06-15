@@ -3,7 +3,6 @@ import cookie from '@fastify/cookie';
 import fastifyEnv from '@fastify/env';
 import session from '@fastify/session';
 import fastifyStatic from '@fastify/static';
-import fastifyMultipart from '@fastify/multipart';
 import fastify, { FastifyInstance } from 'fastify';
 
 import { plugins } from './plugins';
@@ -28,7 +27,6 @@ export async function createServer() {
   });
 
   await server.register(fastifyEnv, fastifyEnvOpts);
-  await server.register(fastifyMultipart);
 
   await server.register(cookie);
   await server.register(session, {

@@ -4,6 +4,7 @@ import { pipeline } from 'stream';
 import { randomBytes } from 'crypto';
 import type { FastifyInstance } from 'fastify';
 import { Static, Type } from '@sinclair/typebox';
+import fastifyMultipart from '@fastify/multipart';
 
 import { UserDir } from '../../utils/fs';
 import { convertToWebP } from '../components/convert-to-webp';
@@ -18,6 +19,8 @@ const cwebpOptsSchema = Type.Object({
 type CwebpOptsType = Static<typeof cwebpOptsSchema>;
 
 export async function resizeRoutes(fastify: FastifyInstance) {
+  await fastify.register(fastifyMultipart);
+
   fastify.route<{ Querystring: CwebpOptsType }>({
     url: '/',
     method: 'POST',

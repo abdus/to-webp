@@ -121,6 +121,41 @@
           : current;
       }
 
+      async function getConvertHistoryFiles() {
+        try {
+          const raw = await fetch('/me/images');
+          const json = await raw.json();
+
+          return json.files;
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function insertImagesInsideDOM(webpUrl, imageContainerDiv) {
+        const img = document.createElement('img');
+        const anchor = document.createElement('a');
+
+        img.setAttribute('src', webpUrl);
+        img.classList.add('rounded', 'w-full', 'h-full', 'object-cover');
+
+        anchor.appendChild(img);
+        anchor.setAttribute('href', webpUrl);
+        anchor.setAttribute('target', '_blank');
+        anchor.setAttribute('name', webpUrl.split('/').pop());
+        anchor.setAttribute('download', '');
+        anchor.classList.add(
+          'rounded',
+          'bg-white',
+          'flex',
+          'items-center',
+          'justify-center'
+        );
+
+        imageContainerDiv.prepend(anchor);
+        imageContainerDiv.classList.remove('hidden');
+      }
+
       try {
         const loadingDataFor = [];
 
@@ -128,6 +163,14 @@
         const formInput = form.querySelector('input[type="file"]');
         const loaderElem = document.querySelector('#loader');
         const imageContainerDiv = document.querySelector('#image-container');
+
+        getConvertHistoryFiles()
+          .then((webpUrls) =>
+            webpUrls.forEach((url) =>
+              insertImagesInsideDOM(url, imageContainerDiv)
+            )
+          )
+          .catch((err) => console.log(err.message));
 
         formInput.addEventListener('change', (ev) => {
           const uid = randStr(7);
@@ -159,33 +202,7 @@
                   throw Error('something went wrong');
                 }
 
-                const webp = resp.data.webp;
-                const img = document.createElement('img');
-                const anchor = document.createElement('a');
-
-                img.setAttribute('src', webp);
-                img.classList.add(
-                  'rounded',
-                  'w-full',
-                  'h-full',
-                  'object-cover'
-                );
-
-                anchor.appendChild(img);
-                anchor.setAttribute('href', webp);
-                anchor.setAttribute('target', '_blank');
-                anchor.setAttribute('name', webp.split('/').pop());
-                anchor.setAttribute('download', '');
-                anchor.classList.add(
-                  'rounded',
-                  'bg-white',
-                  'flex',
-                  'items-center',
-                  'justify-center'
-                );
-
-                imageContainerDiv.prepend(anchor);
-                imageContainerDiv.classList.remove('hidden');
+                insertImagesInsideDOM(resp.data.webp, imageContainerDiv);
               })
               .finally(() => {
                 const idx = loadingDataFor.indexOf(blockId);
