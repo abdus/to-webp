@@ -6,10 +6,11 @@ import type { FastifyInstance } from 'fastify';
 import { Static, Type } from '@sinclair/typebox';
 import fastifyMultipart from '@fastify/multipart';
 
-import { UserDir } from '../../utils/fs';
-import { convertToWebP } from '../components/convert-to-webp';
+import { UserDir } from '../utils/img-to-webp';
+import { convertToWebP } from '../utils/convert-to-webp';
 
 const pump = promisify(pipeline);
+
 const cwebpOptsSchema = Type.Object({
   size: Type.Number({ maximum: 5e6 /* 5 MB */, default: 0 }),
   width: Type.Number({ default: 0, maximum: 7000, minimum: 0 }),
@@ -18,7 +19,7 @@ const cwebpOptsSchema = Type.Object({
 });
 type CwebpOptsType = Static<typeof cwebpOptsSchema>;
 
-export async function resizeRoutes(fastify: FastifyInstance) {
+export async function convertRoutes(fastify: FastifyInstance) {
   await fastify.register(fastifyMultipart);
 
   fastify.route<{ Querystring: CwebpOptsType }>({

@@ -21,7 +21,7 @@ export async function userRoutes(fastify: FastifyInstance) {
       try {
         const userFiles = fs
           .readdirSync(`.uploads/${userId}`)
-          .filter(file => file.endsWith(`webp`))
+          .filter((file) => file.endsWith('webp'))
           .map((file) => `/bin/${userId}/${file}`);
 
         return { files: userFiles };

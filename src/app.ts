@@ -6,7 +6,7 @@ import fastifyStatic from '@fastify/static';
 import fastify, { FastifyInstance } from 'fastify';
 
 import { plugins } from './plugins';
-import { routes } from './lib/routes';
+import { routes } from './routes';
 import { fastifyEnvOpts } from './config/env';
 import { fastifyOpts } from './config/fastify';
 import { UPLOAD_DIR } from './config/constants';

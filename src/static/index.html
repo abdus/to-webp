@@ -39,7 +39,7 @@
           <input
             type="file"
             multiple
-            accept="image/png,image/jpeg,image/webp,application/zip,application/x-zip,application/x-zip-compressed"
+            accept="image/*,application/zip,application/x-zip,application/x-zip-compressed"
             class="py-2"
           />
         </label>
@@ -132,11 +132,18 @@
         }
       }
 
-      function insertImagesInsideDOM(webpUrl, imageContainerDiv) {
+      function insertImagesInsideDOM(
+        webpUrl,
+        imageContainerDiv,
+        isZip = false
+      ) {
         const img = document.createElement('img');
         const anchor = document.createElement('a');
 
-        img.setAttribute('src', webpUrl);
+        img.setAttribute(
+          'src',
+          isZip ? 'https://i.ibb.co/PTv2QvM/zip.png' : webpUrl
+        );
         img.classList.add('rounded', 'w-full', 'h-full', 'object-cover');
 
         anchor.appendChild(img);
@@ -167,7 +174,11 @@
         getConvertHistoryFiles()
           .then((webpUrls) =>
             webpUrls.forEach((url) =>
-              insertImagesInsideDOM(url, imageContainerDiv)
+              insertImagesInsideDOM(
+                url,
+                imageContainerDiv,
+                url?.endsWith('.zip')
+              )
             )
           )
           .catch((err) => console.log(err.message));
@@ -183,6 +194,10 @@
             const blockId = Symbol('block id');
             loadingDataFor.push(blockId);
 
+            const mime = file.mime || file.type;
+            const basePath =
+              mime === 'application/zip' ? 'convert-from-zip' : 'convert';
+
             const q = srcFormData.get('quality') || 75;
             const size = (parseInt(srcFormData.get('size')) || 0) * 1000; // in bytes
             const width = srcFormData.get('width') || 0;
@@ -192,7 +207,7 @@
 
             xhrFormData.append('file', file);
 
-            fetch(encodeURI(`/resize?${opts}`), {
+            fetch(encodeURI(`/${basePath}?${opts}`), {
               method: 'POST',
               body: xhrFormData,
             })
@@ -202,7 +217,11 @@
                   throw Error('something went wrong');
                 }
 
-                insertImagesInsideDOM(resp.data.webp, imageContainerDiv);
+                insertImagesInsideDOM(
+                  resp.data.webp,
+                  imageContainerDiv,
+                  mime === 'application/zip'
+                );
               })
               .finally(() => {
                 const idx = loadingDataFor.indexOf(blockId);
