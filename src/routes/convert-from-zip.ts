@@ -48,9 +48,9 @@ export async function convertFromZipRoutes(fastify: FastifyInstance) {
 
       unzippedFiles.forEach((relFile) => {
         const outFile = zipToWebp.getResultantWebpPath(relFile);
-        const absFile = path.join(zipToWebp.getUserDecompressDir(), relFile);
+        //const absFile = path.join(zipToWebp.getUserDecompressDir(), relFile);
 
-        promises.push(convertToWebP(absFile, outFile));
+        promises.push(convertToWebP(relFile, outFile));
       });
 
       await Promise.allSettled(promises);

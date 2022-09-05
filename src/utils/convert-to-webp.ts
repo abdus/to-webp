@@ -31,11 +31,11 @@ export function convertToWebP(
   const doesSourceExists = fs.existsSync(source);
 
   if (!doesSourceExists) {
-    throw Error('source does not exists');
+    throw Error(`source does not exists: ${source}`);
   }
 
   if (!doesCwebPExists) {
-    throw Error('cwebp is not installed. please install it');
+    throw Error(`cwebp is not installed. please install it${destination}`);
   }
 
   execSync(

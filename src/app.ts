@@ -12,7 +12,10 @@ import { fastifyOpts } from './config/fastify';
 import { UPLOAD_DIR } from './config/constants';
 
 export async function createServer() {
-  const server: FastifyInstance = fastify(fastifyOpts);
+  const server: FastifyInstance = fastify({
+    ...fastifyOpts,
+    disableRequestLogging: true,
+  });
 
   await server.register(fastifyStatic, {
     root: path.resolve(UPLOAD_DIR),

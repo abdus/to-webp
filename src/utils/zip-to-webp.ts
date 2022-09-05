@@ -1,11 +1,22 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { join } from 'node:path';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 import type { MultipartFile } from '@fastify/multipart';
 
 import { UPLOAD_DIR } from '../config/constants';
+
+function deepReadDir(dirPath: string): any[] {
+  return fs
+    .readdirSync(dirPath)
+    .map((entity) => {
+      const p = join(dirPath, entity);
+      return fs.lstatSync(p).isDirectory() ? deepReadDir(p) : p;
+    })
+    .flat(Number.POSITIVE_INFINITY);
+}
 
 export class ZipToWebp {
   /**
@@ -76,9 +87,13 @@ export class ZipToWebp {
   }
 
   getUnzippedFiles() {
-    return fs
-      .readdirSync(this.getUserDecompressDir())
-      .filter((file) => !file.endsWith('webp'));
+    const files = deepReadDir(this.getUserDecompressDir()).filter(
+      (file: string) => !file.endsWith('webp'),
+    );
+
+    console.log({ files });
+
+    return files;
   }
 
   getConvertedWebpFiles() {
