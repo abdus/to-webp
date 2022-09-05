@@ -87,13 +87,9 @@ export class ZipToWebp {
   }
 
   getUnzippedFiles() {
-    const files = deepReadDir(this.getUserDecompressDir()).filter(
+    return deepReadDir(this.getUserDecompressDir()).filter(
       (file: string) => !file.endsWith('webp'),
     );
-
-    console.log({ files });
-
-    return files;
   }
 
   getConvertedWebpFiles() {
@@ -106,7 +102,10 @@ export class ZipToWebp {
     let chunk = '';
 
     if (fname) {
-      chunk = `${fname.replace(/\..*$/gi, '').replace(/'/gi, '')}.webp`;
+      const splitted = fname.split('/');
+      chunk = `${splitted[splitted.length - 1]
+        ?.replace(/\..*$/gi, '')
+        .replace(/'/gi, '')}.webp`;
     } else {
       chunk = `${crypto.randomUUID()}.webp`;
     }
