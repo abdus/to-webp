@@ -21,5 +21,10 @@ export async function routes(fastify: FastifyInstance) {
       // reply.send(htmlContent);
       reply.send({ filename: 'CHANGELOG.md', mdContent, htmlContent });
     });
+
+    fastify.post('/logout', async (req, reply) => {
+      await req.session.destroy();
+      reply.send({ status: true, message: 'session destroyed' });
+    });
   });
 }

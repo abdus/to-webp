@@ -35,15 +35,6 @@
       </h1>
 
       <form id="source-img-upload">
-        <label class="block my-2">
-          <input
-            type="file"
-            multiple
-            accept="image/*,application/zip,application/x-zip,application/x-zip-compressed"
-            class="py-2"
-          />
-        </label>
-
         <div class="flex flex-wrap gap-4">
           <label class="grow">
             <span class="text-sm tracking-wider">QUALITY</span>
@@ -100,15 +91,41 @@
         >
           LOADING
         </div>
+
+        <label class="block my-2">
+          <input
+            type="file"
+            multiple
+            accept="image/*,application/zip,application/x-zip,application/x-zip-compressed"
+            class="py-2"
+          />
+        </label>
       </form>
 
       <div
         id="image-container"
         class="my-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 p-2 border rounded hidden"
       ></div>
+
+      <div>
+        <button id="dl-all" class="px-4 py-2 border rounded-lg">
+          Download All
+        </button>
+
+        <button
+          id="cl-all"
+          class="px-4 py-2 text-red-500 border border-red-500 rounded-lg"
+        >
+          Clear All
+        </button>
+      </div>
     </div>
 
-    <script>
+    <script type="module">
+      import { downloadZip } from 'https://cdn.jsdelivr.net/npm/client-zip/index.js';
+
+      const images = [];
+
       function randStr(length, current) {
         current = current ? current : '';
         return length
@@ -161,6 +178,9 @@
 
         imageContainerDiv.prepend(anchor);
         imageContainerDiv.classList.remove('hidden');
+
+        // store in the global image dir
+        images.push({ url: webpUrl });
       }
 
       try {
@@ -170,6 +190,38 @@
         const formInput = form.querySelector('input[type="file"]');
         const loaderElem = document.querySelector('#loader');
         const imageContainerDiv = document.querySelector('#image-container');
+        const clearAllBtn = document.querySelector('#cl-all');
+        const downloadAllBtn = document.querySelector('#dl-all');
+
+        clearAllBtn.addEventListener('click', () => {
+          fetch(encodeURI(`/logout`), { method: 'POST' })
+            .then((data) => data.json())
+            .then(() => window.location.reload())
+            .catch((err) => console.log(err.message));
+        });
+
+        downloadAllBtn.addEventListener('click', async () => {
+          const promises = [];
+
+          images.forEach((img) => {
+            promises.push(fetch(img.url));
+          });
+
+          const settled = (await Promise.allSettled(promises))
+            .map((x) => {
+              if (x.status === 'fulfilled') return x.value;
+              else return null;
+            })
+            .filter((x) => !!x);
+
+          const blob = await downloadZip(settled).blob();
+
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = 'test.zip';
+          link.click();
+          link.remove();
+        });
 
         getConvertHistoryFiles()
           .then((webpUrls) =>
