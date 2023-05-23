@@ -218,7 +218,7 @@
 
           const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
-          link.download = 'test.zip';
+          link.download = `webp-images-${Date.now()}.zip`;
           link.click();
           link.remove();
         });
